@@ -1,0 +1,28 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Chore {
+  id: ID!
+  text: String!
+  done: Boolean!
+  user: User!
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  chores: [Chore!]!
+}
+
+input NewChore {
+  text: String!
+  userId: String!
+}
+
+type Mutation {
+  createChore(input: NewChore!): Chore!
+}
