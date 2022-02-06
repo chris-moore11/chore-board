@@ -3,26 +3,23 @@
 # https://gqlgen.com/getting-started/
 
 type Chore {
-  id: ID!
+  id: Int!
   text: String!
   done: Boolean!
-  user: User!
+  image: String!
+  tutorial: String!
 }
 
 type User {
-  id: ID!
+  id: Int!
   name: String!
+  email: String!
+  image: String!
+  choreId: Int!
+  admin: Boolean!
 }
 
 type Query {
   chores: [Chore!]!
-}
-
-input NewChore {
-  text: String!
-  userId: String!
-}
-
-type Mutation {
-  createChore(input: NewChore!): Chore!
+  users: [User!]!
 }

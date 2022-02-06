@@ -6,38 +6,79 @@ package graph
 import (
 	"cmoore/chore-board/graph/generated"
 	"cmoore/chore-board/graph/model"
+	"cmoore/chore-board/db"
 	"context"
-	"fmt"
-	"math/rand"
 )
 
-func (r *choreResolver) User(ctx context.Context, obj *model.Chore) (*model.User, error) {
-	return &model.User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
-}
+type Resolver struct{}
 
-func (r *mutationResolver) CreateChore(ctx context.Context, input model.NewChore) (*model.Chore, error) {
-	chore := &model.Chore{
-		Text:   input.Text,
-		ID:     fmt.Sprintf("T%d", rand.Int()),
-		UserID: input.UserID,
-	}
-	r.chores = append(r.chores, chore)
-	return chore, nil
-}
 
 func (r *queryResolver) Chores(ctx context.Context) ([]*model.Chore, error) {
-	return r.chores, nil
+	var (
+		id int
+		text string
+		done bool
+		image string
+		tutorial string
+	)
+	rows, err := db.GlobalInstance.Query("SELECT * FROM chores")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	var chores []*model.Chore
+
+	for rows.Next() {
+		err := rows.Scan(&id, &text, &done, &image, &tutorial)
+		if err != nil {
+			panic(err)
+		}
+		chore := &model.Chore{ID: id, Text: text, Done: done, Image: image, Tutorial: tutorial}
+		chores = append(chores, chore)
+	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+
+	return chores, nil
 }
 
-// Chore returns generated.ChoreResolver implementation.
-func (r *Resolver) Chore() generated.ChoreResolver { return &choreResolver{r} }
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	var (
+		id int
+		name string
+		email string
+		image string
+		choreId int
+		admin bool
+	)
+	rows, err := db.GlobalInstance.Query("SELECT * FROM users")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
 
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+	var users []*model.User
+
+	for rows.Next() {
+		err := rows.Scan(&id, &name, &email, &image, &choreId, &admin)
+		if err != nil {
+			panic(err)
+		}
+		user := &model.User{ID: id, Name: name, Email: email, Image: image, ChoreID: choreId, Admin: admin}
+		users = append(users, user)
+	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+
+	return users, nil
+}
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type choreResolver struct{ *Resolver }
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

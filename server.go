@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmoore/chore-board/db"
 	"cmoore/chore-board/graph"
 	"cmoore/chore-board/graph/generated"
 	"log"
@@ -10,7 +11,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 )
 
-const defaultPort = "8080"
+const defaultPort = "80"
 
 func main() {
 	port := os.Getenv("PORT")
@@ -18,12 +19,15 @@ func main() {
 		port = defaultPort
 	}
 
+	db.ConnectDB()
+	defer db.GlobalInstance.Close()
+
 	frontend := http.FileServer(http.Dir("frontend/build/"))
 	http.Handle("/", frontend)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	http.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Printf("connect to http://localhost:%s/ for choreboard", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

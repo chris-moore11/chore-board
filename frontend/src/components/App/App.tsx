@@ -1,51 +1,39 @@
 import React from 'react';
 import './App.css';
-import { useQuery, gql } from "@apollo/client";
+import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
+import * as constants from '../../constants'
 
-const CREATE_CHORE_QUERY = gql`
-  {
-    chores {
-		text
-		done
-		user {
-  			name
-		}
-	}
-  }
-`;
+import { ChoreList } from '../ChoreList/ChoreList'
 
 interface User {
-	name: string,
+	id: number
+  name: string
+  email: string
+  image: string
+  choreId: number
+  admin: boolean
 }
 
 interface Chore {
+	id: number,
 	text: string,
 	done: boolean,
-	user: User,
+	image: string,
+	tutorial: string,
 }
 
+const client = new ApolloClient({
+  uri: constants.HOSTNAME + "/query",
+  cache: new InMemoryCache()
+});
+
 function App() {
-  const { data, loading, error } = useQuery(CREATE_CHORE_QUERY);
-
-  if (loading) return <b>"Loading..."</b>;
-  if (error) return <pre>{error.message}</pre>
-
-  //return (
-  // <button onClick={log}>God fucking damnit bart!</button>
-  //);
-//
-  //function log() {
-  //  console.log('bill');
-  //}
 
   return (
     <div>
-      <h1>SpaceX Launches</h1>
-      <ul>
-        {data.chores.map((chore: Chore) => (
-          <li key={chore.text}>{chore.text}</li>
-        ))}
-      </ul>
+      <ApolloProvider client={client}>
+        <ChoreList />
+      </ApolloProvider>
     </div>
   );
 }
