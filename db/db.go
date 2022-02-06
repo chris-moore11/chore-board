@@ -7,8 +7,8 @@ import (
 )
 
 const (
-    host = "localhost"
-    port = 5432
+    host = "host.docker.internal"
+    port = "5432"
     user = "postgres"
     password = "1234"
     dbname = "db"
@@ -18,8 +18,8 @@ const (
 var GlobalInstance *sql.DB
 
 func ConnectDB() {
-	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", 
-		host, port, user, password, dbname)
+	connStr := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable", 
+		user, password, host, port, dbname)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
