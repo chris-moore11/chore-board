@@ -1,0 +1,36 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: choreservice
+spec:
+  selector:
+    app: chore-board-app
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30001
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chore-board-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: chore-board-app
+  template:
+    metadata:
+      labels:
+        app: chore-board-app
+    spec:
+      containers:
+        - name: chore-board-app
+          image: chrismoore11/chore-board:v1.0.0
+          ports:
+            - containerPort: 80
+
+
