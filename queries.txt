@@ -1,0 +1,39 @@
+CREATE TABLE users (  
+  id INTEGER PRIMARY KEY NOT NULL,  
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  image TEXT NOT NULL,
+  choreId INTEGER NOT NULL,
+  admin BOOLEAN NOT NULL
+);
+
+CREATE TABLE chores (  
+  id INTEGER PRIMARY KEY NOT NULL,  
+  text TEXT NOT NULL,
+  done BOOLEAN NOT NULL,
+  image TEXT NOT NULL,
+  tutorial TEXT NOT NULL
+  );
+
+INSERT INTO users (id, name, email, image, choreId, admin)
+VALUES
+    (1, 'Anthony', 'anthony@gmail.com', '', 1, false),
+    (2, 'Michael', 'michael@gmail.com', '', 2, false),
+    (3, 'Noah', 'noah@gmail.com', '', 3, false),
+    (4, 'Frits', 'frits@gmail.com', '', 4, false),
+	(5, 'Andy', 'andy@gmail.com', '', 5, false),
+	(6, 'Conor', 'conor@gmail.com', '', 6, false),
+	(7, 'Chris', 'chris@gmail.com', '', 7, true),
+	(8, 'Bart', 'bart@gmail.com', '', 8, false)
+
+
+INSERT INTO chores (id, text, done, image, tutorial)
+VALUES
+    (1, 'Clean Kitchen', false, '', ''),
+    (2, 'Clean Floors', false, '', ''),
+    (3, 'Trash', false, '', ''),
+    (4, 'Clean Backyard', false, '', ''),
+	(5, 'Clean Common Room', false, '', ''),
+	(6, 'CHLORD', false, '', ''),
+	(7, 'Off', false, '', ''),
+	(8, 'Off', false, '', '')

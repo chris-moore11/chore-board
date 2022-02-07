@@ -1,0 +1,24 @@
+.choreList {
+	max-width: min(100%, 375px);
+}
+
+.chore {
+    display:inline-block;
+	width: 59%;
+}
+
+.user {
+    display:inline-block;
+	width: 39%;
+}
+
+.buttons {
+	display: inline-block; 
+  	width: 100%;
+}
+
+ol {
+	padding-left: 5%;
+	padding-right: 5%;
+	list-style-type: none;
+}
