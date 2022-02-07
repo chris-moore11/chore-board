@@ -35,6 +35,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -48,6 +49,11 @@ type ComplexityRoot struct {
 		Image    func(childComplexity int) int
 		Text     func(childComplexity int) int
 		Tutorial func(childComplexity int) int
+	}
+
+	Mutation struct {
+		RotateBackward func(childComplexity int) int
+		RotateForward  func(childComplexity int) int
 	}
 
 	Query struct {
@@ -65,6 +71,10 @@ type ComplexityRoot struct {
 	}
 }
 
+type MutationResolver interface {
+	RotateForward(ctx context.Context) (bool, error)
+	RotateBackward(ctx context.Context) (bool, error)
+}
 type QueryResolver interface {
 	Chores(ctx context.Context) ([]*model.Chore, error)
 	Users(ctx context.Context) ([]*model.User, error)
@@ -119,6 +129,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Chore.Tutorial(childComplexity), true
+
+	case "Mutation.rotateBackward":
+		if e.complexity.Mutation.RotateBackward == nil {
+			break
+		}
+
+		return e.complexity.Mutation.RotateBackward(childComplexity), true
+
+	case "Mutation.rotateForward":
+		if e.complexity.Mutation.RotateForward == nil {
+			break
+		}
+
+		return e.complexity.Mutation.RotateForward(childComplexity), true
 
 	case "Query.chores":
 		if e.complexity.Query.Chores == nil {
@@ -200,6 +224,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -250,6 +288,11 @@ type User {
 type Query {
   chores: [Chore!]!
   users: [User!]!
+}
+
+type Mutation {
+  rotateForward: Boolean!
+  rotateBackward: Boolean!
 }
 `, BuiltIn: false},
 }
@@ -485,6 +528,76 @@ func (ec *executionContext) _Chore_tutorial(ctx context.Context, field graphql.C
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_rotateForward(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RotateForward(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_rotateBackward(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RotateBackward(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_chores(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2001,6 +2114,42 @@ func (ec *executionContext) _Chore(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "tutorial":
 			out.Values[i] = ec._Chore_tutorial(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "rotateForward":
+			out.Values[i] = ec._Mutation_rotateForward(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "rotateBackward":
+			out.Values[i] = ec._Mutation_rotateBackward(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

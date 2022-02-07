@@ -1,10 +1,14 @@
 import React from 'react';
+import { useState } from 'react';
 import { gql, useQuery } from '@apollo/client';
+import { RotateForward } from './RotateForward';
+import { RotateBackward } from './RotateBackward';
 
+require('./choreList.css');
 
 interface IProps {}
 
-const CHORES_USERS_COMBINED_QUERY = gql`
+export const CHORES_USERS_COMBINED_QUERY = gql`
   {
     chores {
 	  id
@@ -42,19 +46,33 @@ interface User {
 }
 
 export function ChoreList(props: IProps) {
-	const { data, loading, error } = useQuery(CHORES_USERS_COMBINED_QUERY);
+	const queryParams = new URLSearchParams(window.location.search);
+	const admin = queryParams.get('admin');
+	const { data, loading, error } = useQuery(CHORES_USERS_COMBINED_QUERY, {
+	  fetchPolicy: "network-only",
+	  nextFetchPolicy: "network-only"
+	});
 
 	if (loading) {
 		return <b>Loading...</b>
 	}
 
 	return (
-		<div>
-			<ul>
-		        {data.users.map((user: User) => (
-		          <li key={user.id}>{user.name}: {data.chores[user.choreId-1].text}</li>
+		<div className="choreList">
+			<ol>
+		        {data.chores.map((chore: Chore) => (
+		          <li key={chore.id}>
+		          	<span className="chore">{data.chores[chore.id-1].text}:</span>
+		          	<span className="user">{data.users.find((user: User) => user.choreId === chore.id).name}</span>
+	          	  </li>
 		        ))}
-		     </ul>
+		    </ol>
+		    {admin && 
+		     	<div className="buttons">
+		     		<RotateBackward/>
+		     		<RotateForward/>
+		     	</div>
+	     	}
 		</div>
 	)
 }

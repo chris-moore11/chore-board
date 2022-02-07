@@ -4,21 +4,80 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
+	"cmoore/chore-board/db"
 	"cmoore/chore-board/graph/generated"
 	"cmoore/chore-board/graph/model"
-	"cmoore/chore-board/db"
 	"context"
 )
 
-type Resolver struct{}
+const MAX_CHORE_ID = 8
 
+func (r *mutationResolver) RotateForward(ctx context.Context) (bool, error) {
+	var (
+		id      int
+		choreId int
+	)
+	rows, err := db.GlobalInstance.Query("SELECT id, choreId FROM users")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&id, &choreId)
+		if err != nil {
+			panic(err)
+		}
+		choreId++
+		if choreId > MAX_CHORE_ID {
+			choreId = 1
+		}
+		updateStatement := "UPDATE users SET choreId=$1 WHERE id=$2;"
+		db.GlobalInstance.Exec(updateStatement, choreId, id)
+	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+	return true, nil
+}
+
+func (r *mutationResolver) RotateBackward(ctx context.Context) (bool, error) {
+	var (
+		id      int
+		choreId int
+	)
+	rows, err := db.GlobalInstance.Query("SELECT id, choreId FROM users")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&id, &choreId)
+		if err != nil {
+			panic(err)
+		}
+		choreId--
+		if choreId < 1 {
+			choreId = 8
+		}
+		updateStatement := "UPDATE users SET choreId=$1 WHERE id=$2;"
+		db.GlobalInstance.Exec(updateStatement, choreId, id)
+	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+	return true, nil
+}
 
 func (r *queryResolver) Chores(ctx context.Context) ([]*model.Chore, error) {
 	var (
-		id int
-		text string
-		done bool
-		image string
+		id       int
+		text     string
+		done     bool
+		image    string
 		tutorial string
 	)
 	rows, err := db.GlobalInstance.Query("SELECT * FROM chores")
@@ -47,12 +106,12 @@ func (r *queryResolver) Chores(ctx context.Context) ([]*model.Chore, error) {
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var (
-		id int
-		name string
-		email string
-		image string
+		id      int
+		name    string
+		email   string
+		image   string
 		choreId int
-		admin bool
+		admin   bool
 	)
 	rows, err := db.GlobalInstance.Query("SELECT * FROM users")
 	if err != nil {
@@ -78,7 +137,11 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	return users, nil
 }
 
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
