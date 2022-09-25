@@ -6,15 +6,15 @@ type Chore {
   id: Int!
   text: String!
   done: Boolean!
+  description: String!
   image: String!
-  tutorial: String!
 }
 
 type User {
   id: Int!
   name: String!
   email: String!
-  image: String!
+  demerits: Int!
   choreId: Int!
   admin: Boolean!
 }

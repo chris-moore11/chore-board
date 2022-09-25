@@ -1,2 +1,2 @@
 
-export const HOSTNAME = "http://blamebart.net:80";
+export const HOSTNAME = "http://localhost:80";

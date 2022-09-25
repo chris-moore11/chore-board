@@ -44,11 +44,11 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Chore struct {
-		Done     func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Image    func(childComplexity int) int
-		Text     func(childComplexity int) int
-		Tutorial func(childComplexity int) int
+		Description func(childComplexity int) int
+		Done        func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Image       func(childComplexity int) int
+		Text        func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -62,12 +62,12 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Admin   func(childComplexity int) int
-		ChoreID func(childComplexity int) int
-		Email   func(childComplexity int) int
-		ID      func(childComplexity int) int
-		Image   func(childComplexity int) int
-		Name    func(childComplexity int) int
+		Admin    func(childComplexity int) int
+		ChoreID  func(childComplexity int) int
+		Demerits func(childComplexity int) int
+		Email    func(childComplexity int) int
+		ID       func(childComplexity int) int
+		Name     func(childComplexity int) int
 	}
 }
 
@@ -94,6 +94,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Chore.description":
+		if e.complexity.Chore.Description == nil {
+			break
+		}
+
+		return e.complexity.Chore.Description(childComplexity), true
 
 	case "Chore.done":
 		if e.complexity.Chore.Done == nil {
@@ -122,13 +129,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Chore.Text(childComplexity), true
-
-	case "Chore.tutorial":
-		if e.complexity.Chore.Tutorial == nil {
-			break
-		}
-
-		return e.complexity.Chore.Tutorial(childComplexity), true
 
 	case "Mutation.rotateBackward":
 		if e.complexity.Mutation.RotateBackward == nil {
@@ -172,6 +172,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.ChoreID(childComplexity), true
 
+	case "User.demerits":
+		if e.complexity.User.Demerits == nil {
+			break
+		}
+
+		return e.complexity.User.Demerits(childComplexity), true
+
 	case "User.email":
 		if e.complexity.User.Email == nil {
 			break
@@ -185,13 +192,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.ID(childComplexity), true
-
-	case "User.image":
-		if e.complexity.User.Image == nil {
-			break
-		}
-
-		return e.complexity.User.Image(childComplexity), true
 
 	case "User.name":
 		if e.complexity.User.Name == nil {
@@ -272,15 +272,15 @@ type Chore {
   id: Int!
   text: String!
   done: Boolean!
+  description: String!
   image: String!
-  tutorial: String!
 }
 
 type User {
   id: Int!
   name: String!
   email: String!
-  image: String!
+  demerits: Int!
   choreId: Int!
   admin: Boolean!
 }
@@ -460,6 +460,41 @@ func (ec *executionContext) _Chore_done(ctx context.Context, field graphql.Colle
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Chore_description(ctx context.Context, field graphql.CollectedField, obj *model.Chore) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Chore",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Chore_image(ctx context.Context, field graphql.CollectedField, obj *model.Chore) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -479,41 +514,6 @@ func (ec *executionContext) _Chore_image(ctx context.Context, field graphql.Coll
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Image, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Chore_tutorial(ctx context.Context, field graphql.CollectedField, obj *model.Chore) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Chore",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Tutorial, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -846,7 +846,7 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_image(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_demerits(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -864,7 +864,7 @@ func (ec *executionContext) _User_image(ctx context.Context, field graphql.Colle
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Image, nil
+		return obj.Demerits, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -876,9 +876,9 @@ func (ec *executionContext) _User_image(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_choreId(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
@@ -2107,13 +2107,13 @@ func (ec *executionContext) _Chore(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "image":
-			out.Values[i] = ec._Chore_image(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._Chore_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "tutorial":
-			out.Values[i] = ec._Chore_tutorial(ctx, field, obj)
+		case "image":
+			out.Values[i] = ec._Chore_image(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2248,8 +2248,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "image":
-			out.Values[i] = ec._User_image(ctx, field, obj)
+		case "demerits":
+			out.Values[i] = ec._User_demerits(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
