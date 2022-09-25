@@ -87,11 +87,11 @@ func InitDB() *sql.DB {
 	ExecOrPanic(db, `
 		INSERT INTO chores (id, text, done, description, image)
 		VALUES
-		(1, 'Clean Kitchen', false, '', ''),
-		(2, 'Clean Floors', false, '', ''),
-		(3, 'Trash', false, '', ''),
-		(4, 'CHLORD', false, '', ''),
-		(5, 'Off', false, '', '');
+		(1, 'Clean Kitchen', false, 'Clean stove, wipe down table and counters, empty drying rack, purge fridge, sweep kitchen floor', ''),
+		(2, 'Clean Floors', false, 'Sweep or vacuum hallways and shared areas (excludes kitchen floor)', ''),
+		(3, 'Trash', false, 'Take out trash and recycling Thursday night, bring it back in Friday morning', ''),
+		(4, 'CHLORD', false, 'Make sure others complete their chores', ''),
+		(5, 'Off', false, 'Relax', '');
 	`)
 
 	fmt.Printf("\nSuccessfully initialized database %s!\n", dbname)

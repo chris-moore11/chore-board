@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
+import ReactTooltip from 'react-tooltip';
 import { gql, useQuery } from '@apollo/client';
 import { RotateForward } from './RotateForward';
 import { RotateBackward } from './RotateBackward';
@@ -48,6 +49,7 @@ interface User {
 export function ChoreList(props: IProps) {
 	const queryParams = new URLSearchParams(window.location.search);
 	const admin = queryParams.get('admin');
+	const usersView = queryParams.get('usersView');
 	const { data, loading, error } = useQuery(CHORES_USERS_COMBINED_QUERY, {
 	  fetchPolicy: 'network-only',
 	  nextFetchPolicy: 'network-only'
@@ -63,17 +65,30 @@ export function ChoreList(props: IProps) {
 			.map((user: User) => user.name)
 			.join(', ');
 
-
 	return (
 		<div className='choreList'>
-			<ol>
-				{data.chores.map((chore: Chore) => (
-					<li key={chore.id}>
-						<span className='chore'>{chore.text}:</span>
-						<span className='user'>{findUsers(chore)}</span>
-					</li>
-				))}
-		    </ol>
+			{usersView ?
+				<ol>
+					{data.users.map((user: User) => (
+						<li key={user.id}>
+							<span className='user'>{user.name}:</span>
+							<span className='chore' data-tip={data.chores.find((chore: Chore) => chore.id == user.choreId).description} data-for='tooltip'>
+								{data.chores.find((chore: Chore) => chore.id == user.choreId).text}
+							</span>
+							<ReactTooltip id='tooltip'/>
+						</li>
+					))}
+		    	</ol> :
+				<ol>
+					{data.chores.map((chore: Chore) => (
+						<li key={chore.id}>
+							<span className='chore' data-tip={chore.description} data-for='tooltip'>{chore.text}:</span>
+							<ReactTooltip id='tooltip'/>
+							<span className='user'>{findUsers(chore)}</span>
+						</li>
+					))}
+				</ol>
+			}
 		    {admin && 
 		     	<div className='buttons'>
 		     		<RotateBackward/>
