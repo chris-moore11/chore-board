@@ -3,18 +3,18 @@
 package model
 
 type Chore struct {
-	ID       int    `json:"id"`
-	Text     string `json:"text"`
-	Done     bool   `json:"done"`
-	Image    string `json:"image"`
-	Tutorial string `json:"tutorial"`
+	ID          int    `json:"id"`
+	Text        string `json:"text"`
+	Done        bool   `json:"done"`
+	Description string `json:"description"`
+	Image       string `json:"image"`
 }
 
 type User struct {
-	ID      int    `json:"id"`
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Image   string `json:"image"`
-	ChoreID int    `json:"choreId"`
-	Admin   bool   `json:"admin"`
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Demerits int    `json:"demerits"`
+	ChoreID  int    `json:"choreId"`
+	Admin    bool   `json:"admin"`
 }
