@@ -15,13 +15,17 @@ You will need to install the following dependencies to run `blamebart.net`:
 # Running the app
 Really simple right now, but may get more complicated over time.
 ## Frontend
-`cd frontend
+```
+cd frontend
 npm install
-npm run build`
+npm run build
+```
 
 ## Backend
-`go run github.com/99designs/gqlgen init
-go run server.go`
+```
+go run github.com/99designs/gqlgen init
+go run server.go
+```
 
 # Captains Log
 
