@@ -65,14 +65,14 @@ func InitDB() *sql.DB {
 	ExecOrPanic(db, `
 		INSERT INTO users (id, name, email, demerits, choreId, admin)
 		VALUES 
-		(1, 'Noah', 'anthony@gmail.com', 0, 1, false),
-		(2, 'Frits', 'michael@gmail.com', 0, 1, false),
-		(3, 'Jesus', 'frits@gmail.com', 0, 2, false),
+		(1, 'Noah', 'noah@gmail.com', 0, 1, false),
+		(2, 'Frits', 'frits@gmail.com', 0, 1, false),
+		(3, 'Jesus', 'jesus@gmail.com', 0, 2, false),
 		(4, 'Conor', 'conor@gmail.com', 0, 3, false),
-		(5, 'Chris', 'noah@gmail.com', 0, 4, true),
-		(6, 'Bart', 'chris@gmail.com', 0, 5, true),
-		(7, 'Anthony', 'bart@gmail.com', 0, 5, false),
-		(8, 'Michael', 'jesus@gmail.com', 0, 5, false);
+		(5, 'Chris', 'chris@gmail.com', 0, 4, true),
+		(6, 'Bart', 'bart@gmail.com', 0, 5, true),
+		(7, 'Anthony', 'anthony@gmail.com', 0, 5, false),
+		(8, 'Michael', 'michael@gmail.com', 0, 5, false);
 	`)
 
 	fmt.Println("Creating chores table")
