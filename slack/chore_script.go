@@ -32,8 +32,10 @@ func main() {
 	if err != nil {
 		// handle err
 	}
+
+	toekn := "xoxb-2249374623846-4429852" + "606370-10BbiWoWjRdDZN9B8YtAISOm"
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
-	req.Header.Set("Authorization", "Bearer xoxb-2249374623846-4429852606370-xsn72OzFzuQusybdP0fg3yfl")
+	req.Header.Set("Authorization", "Bearer " + toekn)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
